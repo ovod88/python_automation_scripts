@@ -27,7 +27,7 @@ with open('test-commands.txt') as f:
     lines = f.read().splitlines()
 print(lines)
 
-all_devices = [iosv_l2_s1, iosv_l2_s2, iosv_l2_s3]
+all_devices = [iosv_l2_s1, iosv_l2_s2, iosv_l2_s3] 
 
 for device in all_devices:
     net_connect = ConnectHandler(**device)

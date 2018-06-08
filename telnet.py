@@ -5,6 +5,7 @@ import sys
 import telnetlib
 import time
 import datetime
+#THERE IS A SCRIPT BY UDEMY COURSE WITH TRY/CATCH AND TIMEOUT
 
 user = input("Enter your telnet username: ")
 password = getpass.getpass()
