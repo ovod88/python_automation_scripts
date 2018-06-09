@@ -3,8 +3,6 @@ import sys
 import socket
 from multiprocessing.dummy import Pool as ThreadPool
 
-ifNotOk = True
-
 def validate_ip(ip):
 	a = ip.split('.')
 	if len(a) != 4:
@@ -24,15 +22,25 @@ def format_to_byte(bit6_value):
 
 # print(format_to_byte('010010'))
 
-while ifNotOk:
+while True:
 	print('Check please allowed parameters')
-	COUNTS = int(raw_input('Enter count number [max 99999]-> '))
+	try:
+		COUNTS = int(raw_input('Enter count number [max 99999, default 10]-> '))
+	except ValueError:
+		print('Taking default value.....')
+		COUNTS = 10
+	try:
+		INTERVAL = float(raw_input('Enter interval [also possible 0.1 = 100ms, default 2s, max 10s]-> '))
+	except ValueError:
+		print('Taking default value.....')
+		INTERVAL = 2
+
 	sys.stdout.write('Enter ip -> ')
 	sys.stdout.flush()
 	ip = sys.stdin.readline()
 	ip = ip.strip()
-	if COUNTS <= 99999:
-		ifNotOk = not validate_ip(ip)
+	if COUNTS <= 99999 and validate_ip(ip) and INTERVAL <= 10:
+		break
 
 
 NUM_THREADS = 4
@@ -84,14 +92,19 @@ while MAX_PINGS:
 
 	MAX_PINGS -= 1
 
-
-def ping(packet):
-	scapy.srloop(packet, count=COUNTS)
+def ping(tuple):
+	QoS_class = tuple[0]
+	packet = tuple[1]
+	result = scapy.srloop(packet, count=COUNTS, inter=INTERVAL, verbose=True)
+	print('--------RESULT FOR QoS CLASS------'),
+	print(QoS_class)
+	print(result)
+	print('----------------------------------')
 
 threads_list = []
 for QoS_class in QoS_classes_selected:
 	tos_val = format_to_byte(QoS_classes_available[QoS_class])
-	threads_list.append((scapy.IP(dst=ip, tos=tos_val)/scapy.ICMP()))
+	threads_list.append((QoS_class,scapy.IP(dst=ip, tos=tos_val)/scapy.ICMP()))
 
 threads = ThreadPool(NUM_THREADS)
 results = threads.map(ping, threads_list)
