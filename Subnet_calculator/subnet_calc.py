@@ -44,10 +44,10 @@ def convertMaskToBinaryTuple(maskString):
 		mask_bits = int(mask_octets[0])
 		
 		while mask_bits > 8:
-			mask_to_return.append(2 ** 8 - 1)
+			mask_to_return.append(bin(2 ** 8 - 1).split('b')[1])
 			mask_bits -= 8
 
-		mask_to_return.append(2 ** 8 - 2 ** (8 - mask_bits))
+		mask_to_return.append(bin(2 ** 8 - 2 ** (8 - mask_bits)).split('b')[1])
 		while len(mask_to_return) < 4:
 			mask_to_return.append(0)
 	else:
