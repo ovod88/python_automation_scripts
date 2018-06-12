@@ -32,6 +32,16 @@ def if_valid_mask(mask):
 	elif len(mask_octets) == 4 and (int(mask_octets[0]) in masks and int(mask_octets[1]) in masks \
 							and int(mask_octets[2]) in masks and int(mask_octets[3]) in masks \
 							and (int(mask_octets[0]) >= int(mask_octets[1]) >= int(mask_octets[2]) >= int(mask_octets[3]))):
+		pay_attention_to_next_octet = False
+
+		for octet in mask_octets:
+
+			if pay_attention_to_next_octet and int(octet) > 0:
+				return False
+
+			if int(octet) < 255:
+				pay_attention_to_next_octet = True
+
 		return True
 	else:
 		return False
@@ -44,14 +54,18 @@ def convertMaskToBinaryTuple(maskString):
 		mask_bits = int(mask_octets[0])
 		
 		while mask_bits > 8:
+			#python represents binary with 'b's
 			mask_to_return.append(bin(2 ** 8 - 1).split('b')[1])
 			mask_bits -= 8
 
 		mask_to_return.append(bin(2 ** 8 - 2 ** (8 - mask_bits)).split('b')[1])
 		while len(mask_to_return) < 4:
-			mask_to_return.append(0)
+			mask_to_return.append('0'*8)
 	else:
 		for octet in mask_octets:
+			if int(octet) == 0:
+				mask_to_return.append('0'*8)
+				continue
 			mask_to_return.append(bin(int(octet)).split('b')[1])
 
 	return tuple(mask_to_return)
