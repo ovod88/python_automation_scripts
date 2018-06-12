@@ -51,9 +51,8 @@ def convertMaskToBinaryTuple(maskString):
 		while len(mask_to_return) < 4:
 			mask_to_return.append(0)
 	else:
-		pass
-
-
+		for octet in mask_octets:
+			mask_to_return.append(bin(int(octet)).split('b')[1])
 
 	return tuple(mask_to_return)
 
