@@ -55,10 +55,11 @@ def convertMaskToBinaryTuple(maskString):
 		
 		while mask_bits > 8:
 			#python represents binary with 'b's
-			mask_to_return.append(bin(2 ** 8 - 1).split('b')[1])
+			mask_to_return.append(format(2 ** 8 - 1, '08b'))
 			mask_bits -= 8
 
-		mask_to_return.append(bin(2 ** 8 - 2 ** (8 - mask_bits)).split('b')[1])
+		mask_to_return.append(format(2 ** 8 - 2 ** (8 - mask_bits), '08b'))
+
 		while len(mask_to_return) < 4:
 			mask_to_return.append('0'*8)
 	else:
@@ -66,7 +67,8 @@ def convertMaskToBinaryTuple(maskString):
 			if int(octet) == 0:
 				mask_to_return.append('0'*8)
 				continue
-			mask_to_return.append(bin(int(octet)).split('b')[1])
+			mask_to_return.append(format(int(octet), '08b'))
+			# mask_to_return.append(bin(int(octet)).split('b')[1])
 
 	return tuple(mask_to_return)
 
@@ -81,11 +83,9 @@ def convertMaskToWildcardTuple(maskString):
 	mask_bytes = convertMaskToBinaryTuple(maskString)
 
 	for byte in mask_bytes:
-		wildcard_octet = bin(255 - int(byte, 2)).split('b')[1]
-		if len(wildcard_octet) < 8:
-			mask_to_return.append('0' * (8 - len(wildcard_octet)) + wildcard_octet)
-		else:
-			mask_to_return.append(wildcard_octet)
+		wildcard_octet = format(255 - int(byte, 2), '08b')
+
+		mask_to_return.append(wildcard_octet)
 
 	return tuple(mask_to_return)
 
@@ -110,21 +110,23 @@ def subnet_calc():
 			else:
 				print('\nThe mask is INVALID. Retry please!\n')
 
-		print(ip_addr)
+		# print(ip_addr)
 		print(mask_binary_octets)
 
 		joined_mask = ''.join(mask_binary_octets)
 
 
-		print(f'Number of hosts {calc_num_hosts(joined_mask)}')
+		# print(f'Number of hosts {calc_num_hosts(joined_mask)}')
 
+		# print(f'Mask is {joined_mask}')
+		
 		wildcard_binary_octets = convertMaskToWildcardTuple(subnet_mask)
 
 		joined_wildcard_mask = ''.join(wildcard_binary_octets)
 
 		print(f'{wildcard_binary_octets}')
 
-		print(f'Wildcard mask is {joined_wildcard_mask}')
+		# print(f'Wildcard mask is {joined_wildcard_mask}')
 
 	except KeyboardInterrupt:
 		print('\n\nProgram aborted by user. Exitting...\n')
