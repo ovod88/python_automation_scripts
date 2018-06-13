@@ -70,17 +70,23 @@ def convertMaskToBinaryTuple(maskString):
 
 	return tuple(mask_to_return)
 
+def calc_num_hosts(mask):
+	num_of_zeros = mask.count('0')
+	num_of_ones = 32 - num_of_zeros
+
+	return abs(2 ** num_of_zeros - 2)
+
 
 def subnet_calc():
 	try:
-		# while True:
-		# 	ip_addr = input('Enter an IP address: ')
+		while True:
+			ip_addr = input('Enter an IP address: ')
 
-		# 	if if_valid_ip(ip_addr):
-		# 		print(f'Ip address {ip_addr} is valid')
-		# 		break
-		# 	else:
-		# 		print('\nThe IP address is INVALID. Retry please!\n')
+			if if_valid_ip(ip_addr):
+				print(f'Ip address {ip_addr} is valid')
+				break
+			else:
+				print('\nThe IP address is INVALID. Retry please!\n')
 
 		while True:
 			subnet_mask = input('Enter a subnet mask: ')
@@ -88,13 +94,17 @@ def subnet_calc():
 			if if_valid_mask(subnet_mask):
 				print(f'Mask {subnet_mask} is valid')
 				mask_binary_octets = convertMaskToBinaryTuple(subnet_mask)
-				print(mask_binary_octets)
-				# break
+				break
 			else:
 				print('\nThe mask is INVALID. Retry please!\n')
 
-		mask_binary_octets = convertMaskToBinaryTuple(subnet_mask)
+		print(ip_addr)
 		print(mask_binary_octets)
+		
+		joined_mask = ''.join(mask_binary_octets)
+
+
+		print(f'Number of hosts {calc_num_hosts(joined_mask)}')
 
 	except KeyboardInterrupt:
 		print('\n\nProgram aborted by user. Exitting...\n')
