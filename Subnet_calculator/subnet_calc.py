@@ -76,6 +76,18 @@ def calc_num_hosts(mask):
 
 	return abs(2 ** num_of_zeros - 2)
 
+def convertMaskToWildcardTuple(maskString):
+	mask_to_return = []
+	mask_bytes = convertMaskToBinaryTuple(maskString)
+
+	for byte in mask_bytes:
+		wildcard_octet = bin(255 - int(byte, 2)).split('b')[1]
+		if len(wildcard_octet) < 8:
+			mask_to_return.append('0' * (8 - len(wildcard_octet)) + wildcard_octet)
+		else:
+			mask_to_return.append(wildcard_octet)
+
+	return tuple(mask_to_return)
 
 def subnet_calc():
 	try:
@@ -100,11 +112,19 @@ def subnet_calc():
 
 		print(ip_addr)
 		print(mask_binary_octets)
-		
+
 		joined_mask = ''.join(mask_binary_octets)
 
 
 		print(f'Number of hosts {calc_num_hosts(joined_mask)}')
+
+		wildcard_binary_octets = convertMaskToWildcardTuple(subnet_mask)
+
+		joined_wildcard_mask = ''.join(wildcard_binary_octets)
+
+		print(f'{wildcard_binary_octets}')
+
+		print(f'Wildcard mask is {joined_wildcard_mask}')
 
 	except KeyboardInterrupt:
 		print('\n\nProgram aborted by user. Exitting...\n')
