@@ -46,7 +46,7 @@ def if_valid_mask(mask):
 	else:
 		return False
 
-def convertMaskToBinaryTuple(maskString):
+def convertMaskToBinary(maskString):
 	mask_octets = maskString.split('.')
 	mask_to_return = []
 
@@ -70,24 +70,55 @@ def convertMaskToBinaryTuple(maskString):
 			mask_to_return.append(format(int(octet), '08b'))
 			# mask_to_return.append(bin(int(octet)).split('b')[1])
 
-	return tuple(mask_to_return)
+	# return tuple(mask_to_return)
+	return ''.join(mask_to_return)
 
 def calc_num_hosts(mask):
-	num_of_zeros = mask.count('0')
-	num_of_ones = 32 - num_of_zeros
+	return abs(2 ** mask.count('0') - 2)
 
-	return abs(2 ** num_of_zeros - 2)
-
-def convertMaskToWildcardTuple(maskString):
+def convertMaskToWildcardBinary(maskString):
+	mask_octets = maskString.split('.')
 	mask_to_return = []
-	mask_bytes = convertMaskToBinaryTuple(maskString)
 
-	for byte in mask_bytes:
-		wildcard_octet = format(255 - int(byte, 2), '08b')
+	for byte in mask_octets:
+		wildcard_octet = format(255 - int(byte), '08b')
 
 		mask_to_return.append(wildcard_octet)
 
-	return tuple(mask_to_return)
+	# return tuple(mask_to_return)
+	return ''.join(mask_to_return)
+
+def network_addr_calc(ip_addr, mask):
+	ip_octets = ip_addr.split('.')
+	ip_octets_binary = []
+
+	for octet in ip_octets:
+		ip_octets_binary.append(format(int(octet), '08b'))
+
+	ip_binary = ''.join(ip_octets_binary)
+	num_of_ones = mask.count('1')
+	num_of_zeros = mask.count('0')
+
+	network_address_binary = ip_binary[:num_of_ones] + '0' * num_of_zeros
+	broadcast_address_binary = ip_binary[:num_of_ones] + '1' * num_of_zeros
+
+	net_ip_octets = []
+	broadcast_ip_octets = []
+	for octet in range(0, len(network_address_binary), 8):
+		net_ip_octet = network_address_binary[octet:octet + 8]
+		net_ip_octets.append(net_ip_octet)
+		broadcast_ip_octet = broadcast_address_binary[octet:octet + 8]
+		broadcast_ip_octets.append(broadcast_ip_octet)
+
+	ip_address_subnet = []
+	broadcast_ip = []
+	for octet, octet2 in zip(net_ip_octets, broadcast_ip_octets):
+		ip_address_subnet.append(str(int(octet, 2)))
+		broadcast_ip.append(str(int(octet2, 2)))		
+
+
+	# return tuple(ip_to_return)
+	return ('.'.join(ip_address_subnet) + '/' + str(num_of_ones), '.'.join(broadcast_ip))
 
 def subnet_calc():
 	try:
@@ -105,28 +136,29 @@ def subnet_calc():
 
 			if if_valid_mask(subnet_mask):
 				print(f'Mask {subnet_mask} is valid')
-				mask_binary_octets = convertMaskToBinaryTuple(subnet_mask)
+				mask_binary = convertMaskToBinary(subnet_mask)
 				break
 			else:
 				print('\nThe mask is INVALID. Retry please!\n')
 
 		# print(ip_addr)
-		print(mask_binary_octets)
-
-		joined_mask = ''.join(mask_binary_octets)
+		print('Mask ' + mask_binary)
 
 
-		# print(f'Number of hosts {calc_num_hosts(joined_mask)}')
+		print(f'Number of hosts {calc_num_hosts(mask_binary)}')
 
 		# print(f'Mask is {joined_mask}')
 		
-		wildcard_binary_octets = convertMaskToWildcardTuple(subnet_mask)
+		wildcard_binary = convertMaskToWildcardBinary(subnet_mask)
 
-		joined_wildcard_mask = ''.join(wildcard_binary_octets)
-
-		print(f'{wildcard_binary_octets}')
+		print(f'Wildcard mask {wildcard_binary}')
 
 		# print(f'Wildcard mask is {joined_wildcard_mask}')
+
+		subnet_address, broadcast_address = network_addr_calc(ip_addr, mask_binary)
+
+		print('Subnet mask ' + subnet_address)
+		print('Broadcast address ' + broadcast_address)
 
 	except KeyboardInterrupt:
 		print('\n\nProgram aborted by user. Exitting...\n')
