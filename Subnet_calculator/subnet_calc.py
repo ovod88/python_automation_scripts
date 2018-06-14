@@ -88,14 +88,17 @@ def convertMaskToWildcardBinary(maskString):
 	# return tuple(mask_to_return)
 	return ''.join(mask_to_return)
 
-def network_addr_calc(ip_addr, mask):
-	ip_octets = ip_addr.split('.')
+def convertIpToBinary(ipString):
+	ip_octets = ipString.split('.')
 	ip_octets_binary = []
 
 	for octet in ip_octets:
 		ip_octets_binary.append(format(int(octet), '08b'))
 
-	ip_binary = ''.join(ip_octets_binary)
+	return ''.join(ip_octets_binary)
+
+def network_addr_calc(ip_addr, mask):
+	ip_octets_binary = convertIpToBinary(ip_addr)
 	num_of_ones = mask.count('1')
 	num_of_zeros = mask.count('0')
 
@@ -157,7 +160,7 @@ def subnet_calc():
 
 		subnet_address, broadcast_address = network_addr_calc(ip_addr, mask_binary)
 
-		print('Subnet mask ' + subnet_address)
+		print('Subnet address ' + subnet_address)
 		print('Broadcast address ' + broadcast_address)
 
 	except KeyboardInterrupt:
@@ -168,4 +171,34 @@ def subnet_calc():
 		exc_info = sys.exc_info()
 		traceback.print_exception(*exc_info)
 
-subnet_calc()
+# subnet_calc()
+
+def next_hop_interface_calc(routes, ip_addr):
+
+	matches_and_interfaces = {}
+
+	for route, interface in routes.items():
+		route_net, mask = route.split('/')
+		route_net_binary = convertIpToBinary(route_net)
+		ip_addr_binary = convertIpToBinary(ip_addr)
+
+		if route_net_binary[:int(mask)] == ip_addr_binary[:int(mask)]:
+			matches_and_interfaces[mask] = interface
+
+		print('Network ' + route_net + ' mask ' + mask)
+
+	max_match = 0
+
+	for match_size, interface in matches_and_interfaces.items():
+		if int(match_size) > max_match:
+			max_match = int(match_size)
+
+	print('Match max ' + str(max_match))
+
+	return matches_and_interfaces[str(max_match)]
+
+next_interface = next_hop_interface_calc({'192.168.2.0/24': 'eth0/0',
+							'192.168.2.0/23': 'eth0/1',
+							'192.168.2.0/25': 'eth0/2' }, '192.168.2.2')
+
+print('Next interface ' + next_interface)
